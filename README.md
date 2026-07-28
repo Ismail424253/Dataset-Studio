@@ -47,7 +47,7 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün | Hedef | Durum |
 |---|---|---|
 | Gün 1 | Proje yapısı kurulumu, `.gitignore`, README hazırlanması | ✅ Tamamlandı |
-| Gün 2 | Veritabanı şema tasarımı ve oluşturulması | 🔲 Planlandı |
+| Gün 2 | Veritabanı şema tasarımı ve oluşturulması | ✅ Tamamlandı |
 | Gün 3 | Backend iskelet yapısı (FastAPI) ve temel Prompt CRUD API | 🔲 Planlandı |
 | Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | 🔲 Planlandı |
 | Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | 🔲 Planlandı |
@@ -57,14 +57,27 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 
 ## Veritabanı Şeması
 
-Veritabanı şeması Gün 2'de tasarlanacak ve bu bölüm güncellenecektir. Planlanan tablolar:
+Detaylı şema dökümantasyonu ve ER diyagramı için: [`docs/database-schema.md`](docs/database-schema.md)
 
-- `prompts` — Prompt kayıtları
-- `prompt_versions` — Her prompt'un versiyon geçmişi
-- `tags` — Etiketler
-- `prompt_tags` — Prompt-etiket ilişkisi (çoka-çok)
-- `datasets` — Veri setleri
-- `dataset_items` — Veri seti öğeleri (prompt versiyonu + model çıktısı)
+### Tablolar
+
+| Tablo | Açıklama | İlişki |
+|---|---|---|
+| `prompts` | Prompt kayıtları (id, title, created_at, updated_at) | — |
+| `prompt_versions` | Versiyon geçmişi (id, prompt_id, version_no, content, created_at) | → prompts (1:N) |
+| `tags` | Etiketler (id, name) | — |
+| `prompt_tags` | Prompt-etiket ilişkisi (prompt_id, tag_id) | prompts ↔ tags (N:M) |
+| `datasets` | Veri setleri (id, name, description, created_at) | — |
+| `dataset_items` | Veri seti öğeleri (id, dataset_id, prompt_version_id, output_text) | → datasets (1:N), → prompt_versions (1:N) |
+
+### ON DELETE Kararları
+
+| İlişki | Davranış | Gerekçe |
+|---|---|---|
+| prompt_versions → prompts | **CASCADE** | Prompt silinince versiyonları da silinir |
+| prompt_tags → prompts / tags | **CASCADE** | İlişkili kayıt silinince bağlantı da temizlenir |
+| dataset_items → datasets | **CASCADE** | Veri seti silinince öğeleri de silinir |
+| dataset_items → prompt_versions | **RESTRICT** | Bir veri setinde kullanılan prompt versiyonu silinemez — veri bütünlüğünü korur |
 
 ## Lisans
 
