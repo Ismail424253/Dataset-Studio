@@ -21,8 +21,8 @@ AI Prompt & Dataset Studio, büyük dil modelleri (LLM) için fine-tuning süre�
 | Araç | Versiyon |
 |---|---|
 | Python | 3.12.0 |
-| Node.js | *Kurulacak (frontend geliştirme Gün 5'te başlıyor)* |
-| Git | *Kurulacak* |
+| Node.js | 24.18.0 |
+| Git | 2.55.0 |
 
 ## Kurulum Talimatları
 
