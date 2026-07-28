@@ -1,0 +1,57 @@
+# ========================
+# Python / FastAPI (backend)
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ========================
+# Node.js / React+Vite (frontend)
+# ========================
+node_modules/
+dist/
+.cache/
+
+# ========================
+# Veritabanı (Database)
+# ========================
+*.db
+*.sqlite
+*.sqlite3
+
+# ========================
+# Ortam Değişkenleri (Environment)
+# ========================
+.env
+.env.local
+.env.*.local
+
+# ========================
+# IDE / Editör Dosyaları
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================
+# İşletim Sistemi Dosyaları
+# ========================
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ========================
+# Log Dosyaları
+# ========================
+*.log
+npm-debug.log*
