@@ -77,8 +77,17 @@ Sunucu calisirken Swagger UI uzerinden tum endpoint'ler test edilebilir: http://
 ### Frontend
 
 ```bash
-# Gün 5'te eklenecek
+# Proje klasorune git
+cd frontend
+
+# Bagimliliklari kur
+npm install
+
+# Gelistirme sunucusunu baslat (varsayilan port: 5173)
+npm run dev
 ```
+
+**Birlikte Calistirma:** Backend ve Frontend'i birlikte calistirmak icin iki ayri terminal acip, birinde backend klasorunde `uvicorn app.main:app --reload` digerinde frontend klasorunde `npm run dev` komutlarini calistirmalisiniz.
 
 ## Proje Durumu ve Yol Haritası
 
@@ -90,7 +99,7 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 2 | Veritabanı şema tasarımı ve oluşturulması | ✅ Tamamlandı |
 | Gün 3 | Backend iskelet yapısı (FastAPI) ve temel Prompt CRUD API | ✅ Tamamlandı |
 | Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | ✅ Tamamlandı |
-| Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | 🔲 Planlandı |
+| Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | ✅ Tamamlandı |
 | Gün 6-10 | Versiyonlama, Diff, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |
 | Gün 16-20 | Validation, Duplicate Detection, Token Tahmini, İstatistikler, Arama/Filtreleme, Son Demo — **Checkpoint #4** | 🔲 Planlandı |
