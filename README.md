@@ -31,8 +31,29 @@ AI Prompt & Dataset Studio, büyük dil modelleri (LLM) için fine-tuning süre�
 ### Backend
 
 ```bash
-# Gün 3'te eklenecek
+# Proje klasorune git
+cd backend
+
+# Sanal ortam olustur ve etkinlestir
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS/Linux
+
+# Bagimliliklari kur
+pip install -r requirements.txt
+
+# Veritabanini olustur (ilk calistirmada)
+python database/init_db.py
+
+# Sunucuyu baslat
+uvicorn app.main:app --reload
 ```
+
+Sunucu basladiktan sonra:
+- API: http://127.0.0.1:8000
+- Swagger UI (otomatik API dokumantasyonu): http://127.0.0.1:8000/docs
+
+**Not:** Veritabani erisimi icin Python standart kutuphanesindeki `sqlite3` modulu kullanilmaktadir. Bu proje olceginde ORM (SQLAlchemy vb.) gereksiz karmasiklik ekleyecegi icin tercih edilmemistir.
 
 ### Frontend
 
@@ -48,7 +69,7 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 |---|---|---|
 | Gün 1 | Proje yapısı kurulumu, `.gitignore`, README hazırlanması | ✅ Tamamlandı |
 | Gün 2 | Veritabanı şema tasarımı ve oluşturulması | ✅ Tamamlandı |
-| Gün 3 | Backend iskelet yapısı (FastAPI) ve temel Prompt CRUD API | 🔲 Planlandı |
+| Gün 3 | Backend iskelet yapısı (FastAPI) ve temel Prompt CRUD API | ✅ Tamamlandı |
 | Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | 🔲 Planlandı |
 | Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | 🔲 Planlandı |
 | Gün 6-10 | Versiyonlama, Diff, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
