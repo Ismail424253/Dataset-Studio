@@ -47,3 +47,70 @@ def get_all_prompts(conn: sqlite3.Connection) -> list[dict]:
     ).fetchall()
 
     return [dict(row) for row in rows]
+
+
+def get_prompt_by_id(conn: sqlite3.Connection, prompt_id: int) -> Optional[dict]:
+    """
+    Belirtilen id'ye sahip prompt'u getirir.
+
+    Args:
+        conn: SQLite baglantisi
+        prompt_id: Prompt id
+
+    Returns:
+        Prompt bilgileri veya None (bulunamazsa)
+    """
+    row = conn.execute(
+        "SELECT id, title, created_at, updated_at FROM prompts WHERE id = ?",
+        (prompt_id,)
+    ).fetchone()
+
+    return dict(row) if row else None
+
+
+def update_prompt(conn: sqlite3.Connection, prompt_id: int, title: str) -> Optional[dict]:
+    """
+    Belirtilen prompt'un basligini gunceller ve updated_at'i simdi yapar.
+
+    Args:
+        conn: SQLite baglantisi
+        prompt_id: Prompt id
+        title: Yeni baslik
+
+    Returns:
+        Guncellenmis prompt bilgileri veya None (bulunamazsa)
+    """
+    # Prompt'un var olup olmadigini kontrol et
+    existing = get_prompt_by_id(conn, prompt_id)
+    if existing is None:
+        return None
+
+    conn.execute(
+        "UPDATE prompts SET title = ?, updated_at = datetime('now') WHERE id = ?",
+        (title, prompt_id)
+    )
+    conn.commit()
+
+    return get_prompt_by_id(conn, prompt_id)
+
+
+def delete_prompt(conn: sqlite3.Connection, prompt_id: int) -> bool:
+    """
+    Belirtilen prompt'u siler.
+    ON DELETE CASCADE sayesinde iliskili prompt_versions ve prompt_tags
+    satirlari otomatik olarak temizlenir.
+
+    Args:
+        conn: SQLite baglantisi
+        prompt_id: Prompt id
+
+    Returns:
+        True (silindi) veya False (bulunamadi)
+    """
+    cursor = conn.execute(
+        "DELETE FROM prompts WHERE id = ?",
+        (prompt_id,)
+    )
+    conn.commit()
+
+    return cursor.rowcount > 0

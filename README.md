@@ -55,6 +55,25 @@ Sunucu basladiktan sonra:
 
 **Not:** Veritabani erisimi icin Python standart kutuphanesindeki `sqlite3` modulu kullanilmaktadir. Bu proje olceginde ORM (SQLAlchemy vb.) gereksiz karmasiklik ekleyecegi icin tercih edilmemistir.
 
+## API Dokumantasyonu
+
+Sunucu calisirken Swagger UI uzerinden tum endpoint'ler test edilebilir: http://127.0.0.1:8000/docs
+
+### Prompt Endpoint'leri
+
+| Metot | Endpoint | Aciklama | Basarili | Hata |
+|---|---|---|---|---|
+| `GET` | `/health` | Sistem saglik kontrolu | 200 | — |
+| `POST` | `/prompts` | Yeni prompt olustur | 201 | 422 (gecersiz body) |
+| `GET` | `/prompts` | Tum prompt'lari listele | 200 | — |
+| `GET` | `/prompts/{id}` | Prompt detayi getir | 200 | 404 (bulunamadi) |
+| `PATCH` | `/prompts/{id}` | Prompt basligini guncelle | 200 | 404, 422 |
+| `DELETE` | `/prompts/{id}` | Prompt sil (CASCADE ile iliskili kayitlar da silinir) | 204 | 404 |
+
+**PUT vs PATCH karari:** `PATCH` tercih edildi cunku su an yalnizca `title` alani guncelleniyor (kismi guncelleme). `PUT` tum kaynak alanlarinin gonderilmesini gerektirir, bu da tek alanlik bir guncelleme icin gereksiz yuk olusturur. Ileride baska alanlar eklense bile `PATCH` semantigi daha uygun kalacaktir.
+
+**Hata yonetimi:** Tum endpoint'ler hatali durumlarda anlamli HTTP status kodlari (404, 422) ve JSON formatinda `{"detail": "..."}` mesajlari dondurur. Pydantic validation hatalari otomatik olarak 422 ile dondurulur.
+
 ### Frontend
 
 ```bash
@@ -70,7 +89,7 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 1 | Proje yapısı kurulumu, `.gitignore`, README hazırlanması | ✅ Tamamlandı |
 | Gün 2 | Veritabanı şema tasarımı ve oluşturulması | ✅ Tamamlandı |
 | Gün 3 | Backend iskelet yapısı (FastAPI) ve temel Prompt CRUD API | ✅ Tamamlandı |
-| Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | 🔲 Planlandı |
+| Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | ✅ Tamamlandı |
 | Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | 🔲 Planlandı |
 | Gün 6-10 | Versiyonlama, Diff, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |

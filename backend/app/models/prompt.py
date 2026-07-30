@@ -14,6 +14,11 @@ class PromptCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Prompt basligi (zorunlu)")
 
 
+class PromptUpdate(BaseModel):
+    """PATCH /prompts/{id} istegi icin body semasi."""
+    title: str = Field(..., min_length=1, max_length=255, description="Yeni prompt basligi (zorunlu)")
+
+
 # ---------- Response Modelleri ----------
 
 class PromptResponse(BaseModel):
