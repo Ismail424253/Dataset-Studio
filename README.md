@@ -101,9 +101,16 @@ npm run dev
 
 Uygulama iki gorunumden olusur: **Prompt Listesi** ve **Prompt Detay**. Sayfalar arasi gecis `react-router-dom` yerine `App.jsx` icerisinde yerel state (`selectedPromptId`) ile yonetilmektedir. Bu yaklasim, yalnizca iki gorunumlu kucuk bir uygulama icin ek bagimliligi gereksiz kilan basit ve yeterli bir cozumdur.
 
-### Versiyon Karsilastirma (Compare)
+### Versiyon Karsilastirma (Compare) ve Diff Gorsellestirme
 
-Prompt detay sayfasindaki versiyon gecmisi listesinde, kullanici herhangi iki versiyonu secip (checkbox ile) "Karsilastir" butonuna basabilir. Su an diff motoru henuz eklenmemis oldugu icin (Gun 8'de yapilacak), buton secilen versiyonlari goruntuleyen bir placeholder mesaj gosterir.
+Prompt detay sayfasindaki versiyon gecmisi listesinde, kullanici herhangi iki versiyonu secip (checkbox ile) "Karsilastir" butonuna basabilir. Sonuc, ayri bir `DiffViewer` bileseni tarafindan gorsellestirilir:
+
+- **Satir numaralari:** Eski (A) ve yeni (B) versiyon icin ayri gutter kolonlari.
+- **Renk kodlamasi:** Eklenen satirlar yesil arka plan ve `+` isareti, kaldirilan satirlar kirmizi arka plan ve `−` isareti, degismemis satirlar notr arka plan.
+- **Monospace font:** Hizalama ve bosluk korunumu icin `font-mono` kullanilir.
+- **Ozet istatistik:** Diff basliginda "X satir eklendi, Y satir silindi" bilgisi gosterilir.
+- **Uzun icerik destegi:** Diff konteyneri `max-h-[500px]` ve `overflow-y: auto` ile sinirlandirilmistir; yatay tasma icin `overflow-x: auto` eklenmistir.
+- **Fark yoksa:** Iki versiyon ozdes ise "Bu iki versiyon arasinda fark bulunamadi" mesaji gosterilir.
 
 ## Proje Durumu ve Yol Haritası
 
@@ -119,7 +126,8 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 6 | Prompt Versiyonlama (Backend) | ✅ Tamamlandı |
 | Gün 7 | Versiyonlama UI (Frontend) | ✅ Tamamlandı |
 | Gün 8 | Diff motoru (Backend + Frontend bağlantısı) | ✅ Tamamlandı |
-| Gün 9-10 | Diff görselleştirme, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
+| Gün 9 | Diff görselleştirme (DiffViewer bileşeni) | ✅ Tamamlandı |
+| Gün 10 | Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |
 | Gün 16-20 | Validation, Duplicate Detection, Token Tahmini, İstatistikler, Arama/Filtreleme, Son Demo — **Checkpoint #4** | 🔲 Planlandı |
 

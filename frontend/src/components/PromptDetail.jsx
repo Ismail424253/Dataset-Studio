@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getVersions, createVersion, compareDiff } from '../api/versions';
 import { updatePrompt } from '../api/prompts';
+import DiffViewer from './DiffViewer';
 
 export default function PromptDetail({ promptId, onBack }) {
   const [prompt, setPrompt] = useState(null);
@@ -278,25 +279,11 @@ export default function PromptDetail({ promptId, onBack }) {
         </div>
       )}
       {diffResult && !diffLoading && (
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-              Karşılaştırma Sonucu — v{diffResult.version_a} ↔ v{diffResult.version_b}
-            </h2>
-          </div>
-          <pre className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
-            {diffResult.diff.map((line, idx) => (
-              <div key={idx} className={
-                line.type === 'added' ? 'bg-green-50 text-green-800' :
-                line.type === 'removed' ? 'bg-red-50 text-red-800' :
-                'text-gray-700'
-              }>
-                {line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  '}
-                {line.text}
-              </div>
-            ))}
-          </pre>
-        </div>
+        <DiffViewer
+          diff={diffResult.diff}
+          versionA={diffResult.version_a}
+          versionB={diffResult.version_b}
+        />
       )}
     </div>
   );
