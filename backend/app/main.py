@@ -4,7 +4,7 @@ AI Prompt & Dataset Studio — FastAPI uygulama giris noktasi.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import prompts
+from app.routes import prompts, tags
 
 app = FastAPI(
     title="AI Prompt & Dataset Studio API",
@@ -38,3 +38,4 @@ def health_check():
 # ---------- Router Kayitlari ----------
 
 app.include_router(prompts.router)
+app.include_router(tags.router)

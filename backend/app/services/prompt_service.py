@@ -39,13 +39,7 @@ def create_prompt(conn: sqlite3.Connection, title: str, content: str) -> dict:
 
 def get_all_prompts(conn: sqlite3.Connection) -> list[dict]:
     """
-    Tum prompt'lari listeler (en yeniler ustte).
-
-    Args:
-        conn: SQLite baglantisi
-
-    Returns:
-        Prompt listesi
+    Tum prompt'lari listeler (en yeniler ustte) ve etiketlerini ekler.
     """
     rows = conn.execute(
         """
@@ -55,19 +49,31 @@ def get_all_prompts(conn: sqlite3.Connection) -> list[dict]:
         """
     ).fetchall()
 
-    return [dict(row) for row in rows]
+    prompts = [dict(row) for row in rows]
+    
+    # Get all tags
+    tags_rows = conn.execute(
+        """
+        SELECT pt.prompt_id, t.id, t.name 
+        FROM prompt_tags pt 
+        JOIN tags t ON pt.tag_id = t.id
+        ORDER BY t.name ASC
+        """
+    ).fetchall()
+    
+    tag_map = {}
+    for r in tags_rows:
+        tag_map.setdefault(r["prompt_id"], []).append({"id": r["id"], "name": r["name"]})
+        
+    for p in prompts:
+        p["tags"] = tag_map.get(p["id"], [])
+
+    return prompts
 
 
 def get_prompt_by_id(conn: sqlite3.Connection, prompt_id: int) -> Optional[dict]:
     """
     Belirtilen id'ye sahip prompt'u getirir.
-
-    Args:
-        conn: SQLite baglantisi
-        prompt_id: Prompt id
-
-    Returns:
-        Prompt bilgileri veya None (bulunamazsa)
     """
     row = conn.execute(
         """
@@ -78,7 +84,24 @@ def get_prompt_by_id(conn: sqlite3.Connection, prompt_id: int) -> Optional[dict]
         (prompt_id,)
     ).fetchone()
 
-    return dict(row) if row else None
+    if not row:
+        return None
+        
+    prompt = dict(row)
+    
+    tags_rows = conn.execute(
+        """
+        SELECT t.id, t.name 
+        FROM tags t 
+        JOIN prompt_tags pt ON t.id = pt.tag_id 
+        WHERE pt.prompt_id = ?
+        ORDER BY t.name ASC
+        """,
+        (prompt_id,)
+    ).fetchall()
+    
+    prompt["tags"] = [dict(t) for t in tags_rows]
+    return prompt
 
 
 def update_prompt(conn: sqlite3.Connection, prompt_id: int, title: str) -> Optional[dict]:

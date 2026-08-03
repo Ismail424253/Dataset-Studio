@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getVersions, createVersion, compareDiff } from '../api/versions';
 import { updatePrompt } from '../api/prompts';
+import { getTags, attachTagToPrompt, removeTagFromPrompt } from '../api/tags';
 import DiffViewer from './DiffViewer';
 
 export default function PromptDetail({ promptId, onBack }) {
@@ -26,9 +27,24 @@ export default function PromptDetail({ promptId, onBack }) {
   const [diffLoading, setDiffLoading] = useState(false);
   const [diffError, setDiffError] = useState(null);
 
+  // Tagging
+  const [allTags, setAllTags] = useState([]);
+  const [newTagName, setNewTagName] = useState('');
+  const [tagError, setTagError] = useState(null);
+
   useEffect(() => {
     fetchData();
+    fetchAllTags();
   }, [promptId]);
+
+  const fetchAllTags = async () => {
+    try {
+      const tags = await getTags();
+      setAllTags(tags);
+    } catch (err) {
+      console.error("Etiketler alınamadı:", err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -119,6 +135,33 @@ export default function PromptDetail({ promptId, onBack }) {
     }
   };
 
+  const handleRemoveTag = async (tagId) => {
+    try {
+      await removeTagFromPrompt(promptId, tagId);
+      setPrompt(prev => ({ ...prev, tags: prev.tags.filter(t => t.id !== tagId) }));
+    } catch (err) {
+      alert("Etiket silinemedi: " + err.message);
+    }
+  };
+
+  const handleAddTag = async (e) => {
+    e.preventDefault();
+    setTagError(null);
+    if (!newTagName.trim()) return;
+    
+    try {
+      const addedTag = await attachTagToPrompt(promptId, newTagName);
+      // Avoid duplicate rendering if already attached
+      if (!prompt.tags.find(t => t.id === addedTag.id)) {
+        setPrompt(prev => ({ ...prev, tags: [...prev.tags, addedTag] }));
+      }
+      setNewTagName('');
+      fetchAllTags(); // refresh tag list for datalist
+    } catch (err) {
+      setTagError(err.message);
+    }
+  };
+
   if (loading) return <div className="text-center py-12 text-gray-500">Yükleniyor...</div>;
   if (error) return (
     <div className="max-w-4xl mx-auto p-4">
@@ -136,6 +179,10 @@ export default function PromptDetail({ promptId, onBack }) {
         &larr; Prompt Listesi
       </button>
 
+      <datalist id="tags-list">
+        {allTags.map(tag => <option key={tag.id} value={tag.name} />)}
+      </datalist>
+
       {/* Prompt Header */}
       <div className="bg-white p-5 rounded-lg shadow mb-6">
         {editingTitle ? (
@@ -151,14 +198,50 @@ export default function PromptDetail({ promptId, onBack }) {
             <button type="button" onClick={() => setEditingTitle(false)} className="text-gray-500 hover:text-gray-700 font-medium text-sm">İptal</button>
           </form>
         ) : (
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-800">{prompt.title}</h1>
-            <button
-              onClick={() => { setEditingTitle(true); setEditTitle(prompt.title); }}
-              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
-            >
-              Düzenle
-            </button>
+          <div>
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-gray-800">{prompt.title}</h1>
+              <button
+                onClick={() => { setEditingTitle(true); setEditTitle(prompt.title); }}
+                className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+              >
+                Düzenle
+              </button>
+            </div>
+            
+            {/* Tags Section */}
+            <div className="mt-3 flex items-center flex-wrap gap-2">
+              {prompt.tags && prompt.tags.map(tag => (
+                <span key={tag.id} className="inline-flex items-center gap-1 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full uppercase tracking-wide font-semibold">
+                  {tag.name}
+                  <button 
+                    onClick={() => handleRemoveTag(tag.id)} 
+                    className="hover:text-purple-900 focus:outline-none"
+                    title="Etiketi Kaldır"
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+              
+              <form onSubmit={handleAddTag} className="flex items-center ml-1">
+                <input
+                  type="text"
+                  list="tags-list"
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  placeholder="Etiket ekle..."
+                  className="border border-gray-300 rounded-l px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-28"
+                />
+                <button 
+                  type="submit" 
+                  className="bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r px-2 py-1 text-xs font-medium text-gray-600"
+                >
+                  +
+                </button>
+              </form>
+              {tagError && <span className="text-red-500 text-xs ml-2">{tagError}</span>}
+            </div>
           </div>
         )}
         <div className="text-xs text-gray-400 mt-2">

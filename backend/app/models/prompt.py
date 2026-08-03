@@ -5,6 +5,7 @@ Prompt Pydantic modelleri — istek/yanit sema tanimlari.
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+from app.models.tag import TagResponse
 
 
 # ---------- Request Modelleri ----------
@@ -29,3 +30,4 @@ class PromptResponse(BaseModel):
     created_at: str
     updated_at: str
     version_count: Optional[int] = None
+    tags: list[TagResponse] = []

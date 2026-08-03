@@ -112,6 +112,14 @@ Prompt detay sayfasindaki versiyon gecmisi listesinde, kullanici herhangi iki ve
 - **Uzun icerik destegi:** Diff konteyneri `max-h-[500px]` ve `overflow-y: auto` ile sinirlandirilmistir; yatay tasma icin `overflow-x: auto` eklenmistir.
 - **Fark yoksa:** Iki versiyon ozdes ise "Bu iki versiyon arasinda fark bulunamadi" mesaji gosterilir.
 
+### Etiketleme (Tagging) Modulu
+
+Prompt'larin kategorize edilebilmesi icin etiketleme modulu eklenmistir. 
+- **Tag Ekleme:** Frontend tarafindan yeni etiket eklenirken, kolaylik amaciyla ID yerine dogrudan `tag_name` (etiket adi) gonderilir (`POST /prompts/{id}/tags`). Backend bu ismi kontrol eder; eger etiket zaten mevcutsa onu prompt'a baglar, yoksa once `tags` tablosuna ekler ve ardindan baglar (upsert).
+- **Mukkerrer Kayit (Idempotent):** Ayni etiket bir prompt'a tekrar eklenmek istendiginde API hata dondurmek yerine basarili (`200 OK`) yanit doner; ilave kayit olusturmaz.
+- **Autocomplete:** Yeni etiket eklenirken kullanici deneyimini artirmak amaciyla mevcut etiketler HTML `<datalist>` kullanilarak otomatik tamamlama secenegi olarak sunulur. Ayri bir dropdown kütüphanesi kullanilmamistir.
+- **Toplu Veri Cekimi:** `GET /prompts` API'si, SQLite uzerinde JOIN ve subquery teknikleriyle tum prompt'larin etiketlerini tek bir sorguda ceker ve listeye dahil eder. Bu sayede frontend listeyi olustururken fazladan API cagirisi yapmaz.
+
 ## Proje Durumu ve Yol Haritası
 
 Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bir (Gün 5, 10, 15, 20) canlı demo içeren bir kontrol noktası (checkpoint) bulunmaktadır.
@@ -127,7 +135,7 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 7 | Versiyonlama UI (Frontend) | ✅ Tamamlandı |
 | Gün 8 | Diff motoru (Backend + Frontend bağlantısı) | ✅ Tamamlandı |
 | Gün 9 | Diff görselleştirme (DiffViewer bileşeni) | ✅ Tamamlandı |
-| Gün 10 | Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
+| Gün 10 | Etiketleme — **Checkpoint #2** | ✅ Tamamlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |
 | Gün 16-20 | Validation, Duplicate Detection, Token Tahmini, İstatistikler, Arama/Filtreleme, Son Demo — **Checkpoint #4** | 🔲 Planlandı |
 

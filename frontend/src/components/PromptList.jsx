@@ -160,8 +160,17 @@ export default function PromptList({ onOpenPrompt }) {
                 ) : (
                   <>
                     <div className="flex-1 cursor-pointer" onClick={() => onOpenPrompt(prompt.id)}>
-                      <div className="text-gray-800 font-medium hover:text-blue-600 transition-colors">
+                      <div className="text-gray-800 font-medium hover:text-blue-600 transition-colors flex items-center gap-2">
                         {prompt.title}
+                        {prompt.tags && prompt.tags.length > 0 && (
+                          <div className="flex gap-1 ml-2">
+                            {prompt.tags.map(tag => (
+                              <span key={tag.id} className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wide font-semibold">
+                                {tag.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         Oluşturuldu: {new Date(prompt.created_at).toLocaleString('tr-TR')} 

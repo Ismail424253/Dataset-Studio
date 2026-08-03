@@ -192,3 +192,46 @@ def compare_versions(prompt_id: int, body: DiffRequest, conn: sqlite3.Connection
         "version_b": body.version_b,
         "diff": diff_lines,
     }
+
+
+# ---------- Tag Route'lari (Prompt'a Ozel) ----------
+
+from app.models.tag import TagResponse, PromptTagAttach
+from app.services import tag_service
+
+@router.post(
+    "/{prompt_id}/tags",
+    response_model=TagResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Prompt'a etiket ekle",
+    description="Prompt'a yeni bir etiket ekler (isim uzerinden). Eger etiket yoksa olusturur."
+)
+def attach_tag(prompt_id: int, body: PromptTagAttach, conn: sqlite3.Connection = Depends(get_db)):
+    tag = tag_service.attach_tag_to_prompt(conn, prompt_id, body.tag_name)
+    if tag is None:
+        raise HTTPException(status_code=404, detail="Prompt bulunamadi")
+    return tag
+
+@router.get(
+    "/{prompt_id}/tags",
+    response_model=list[TagResponse],
+    summary="Prompt'un etiketlerini getir"
+)
+def list_prompt_tags(prompt_id: int, conn: sqlite3.Connection = Depends(get_db)):
+    prompt = prompt_service.get_prompt_by_id(conn, prompt_id)
+    if prompt is None:
+        raise HTTPException(status_code=404, detail="Prompt bulunamadi")
+    return tag_service.get_tags_for_prompt(conn, prompt_id)
+
+@router.delete(
+    "/{prompt_id}/tags/{tag_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Prompt'tan etiket kaldir"
+)
+def remove_tag(prompt_id: int, tag_id: int, conn: sqlite3.Connection = Depends(get_db)):
+    deleted = tag_service.remove_tag_from_prompt(conn, prompt_id, tag_id)
+    if not deleted:
+        # Prompt veya tag-baglantisi yok
+        # Ancak idempotent tutmak daha iyi olabilir, yine de 404 donebiliriz
+        raise HTTPException(status_code=404, detail="Iliski bulunamadi")
+    return None
