@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.database import get_db
 from app.models.prompt import PromptCreate, PromptUpdate, PromptResponse
 from app.models.version import VersionCreate, VersionResponse
-from app.services import prompt_service, version_service
+from app.models.diff import DiffRequest, DiffResponse
+from app.services import prompt_service, version_service, diff_service
 
 router = APIRouter(prefix="/prompts", tags=["Prompts"])
 
@@ -140,3 +141,54 @@ def get_version(prompt_id: int, version_no: int, conn: sqlite3.Connection = Depe
             detail="Prompt veya versiyon bulunamadi"
         )
     return version
+
+
+# ---------- Diff Route'u ----------
+
+@router.post(
+    "/{prompt_id}/diff",
+    response_model=DiffResponse,
+    summary="Iki versiyon arasindaki farki hesapla",
+    description="Belirtilen iki versiyon numarasinin icerigini satir bazli karsilastirir.",
+)
+def compare_versions(prompt_id: int, body: DiffRequest, conn: sqlite3.Connection = Depends(get_db)):
+    """Iki versiyon arasindaki diff'i hesaplar ve dondurur."""
+    # Ayni versiyon kontrolu
+    if body.version_a == body.version_b:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Ayni versiyon kendisiyle karsilastirilamaz"
+        )
+
+    # Prompt kontrolu
+    prompt = prompt_service.get_prompt_by_id(conn, prompt_id)
+    if prompt is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prompt bulunamadi"
+        )
+
+    # Versiyon A kontrolu
+    ver_a = version_service.get_version(conn, prompt_id, body.version_a)
+    if ver_a is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Versiyon {body.version_a} bulunamadi"
+        )
+
+    # Versiyon B kontrolu
+    ver_b = version_service.get_version(conn, prompt_id, body.version_b)
+    if ver_b is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Versiyon {body.version_b} bulunamadi"
+        )
+
+    # Diff hesapla
+    diff_lines = diff_service.compute_diff(ver_a["content"], ver_b["content"])
+
+    return {
+        "version_a": body.version_a,
+        "version_b": body.version_b,
+        "diff": diff_lines,
+    }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getVersions, createVersion } from '../api/versions';
+import { getVersions, createVersion, compareDiff } from '../api/versions';
 import { updatePrompt } from '../api/prompts';
 
 export default function PromptDetail({ promptId, onBack }) {
@@ -19,6 +19,11 @@ export default function PromptDetail({ promptId, onBack }) {
   // Version comparison selection
   const [compareA, setCompareA] = useState(null);
   const [compareB, setCompareB] = useState(null);
+
+  // Diff result
+  const [diffResult, setDiffResult] = useState(null);
+  const [diffLoading, setDiffLoading] = useState(false);
+  const [diffError, setDiffError] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -97,10 +102,20 @@ export default function PromptDetail({ promptId, onBack }) {
   const isSelected = (versionNo) => compareA === versionNo || compareB === versionNo;
   const canCompare = compareA !== null && compareB !== null;
 
-  const handleCompare = () => {
+  const handleCompare = async () => {
     const vA = Math.min(compareA, compareB);
     const vB = Math.max(compareA, compareB);
-    alert(`Karşılaştırma özelliği henüz hazır değil.\n\nSeçilen versiyonlar: v${vA} ↔ v${vB}\n\n(Gün 8'de diff motoru eklenecektir.)`);
+    try {
+      setDiffLoading(true);
+      setDiffError(null);
+      const result = await compareDiff(promptId, vA, vB);
+      setDiffResult(result);
+    } catch (err) {
+      setDiffError(err.message);
+      setDiffResult(null);
+    } finally {
+      setDiffLoading(false);
+    }
   };
 
   if (loading) return <div className="text-center py-12 text-gray-500">Yükleniyor...</div>;
@@ -250,6 +265,39 @@ export default function PromptDetail({ promptId, onBack }) {
           </ul>
         )}
       </div>
+
+      {/* Diff Result */}
+      {diffLoading && (
+        <div className="bg-white p-5 rounded-lg shadow mb-6 text-center text-gray-500">
+          Karşılaştırma hesaplanıyor...
+        </div>
+      )}
+      {diffError && (
+        <div className="bg-white p-5 rounded-lg shadow mb-6">
+          <div className="text-red-500">Karşılaştırma hatası: {diffError}</div>
+        </div>
+      )}
+      {diffResult && !diffLoading && (
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Karşılaştırma Sonucu — v{diffResult.version_a} ↔ v{diffResult.version_b}
+            </h2>
+          </div>
+          <pre className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+            {diffResult.diff.map((line, idx) => (
+              <div key={idx} className={
+                line.type === 'added' ? 'bg-green-50 text-green-800' :
+                line.type === 'removed' ? 'bg-red-50 text-red-800' :
+                'text-gray-700'
+              }>
+                {line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  '}
+                {line.text}
+              </div>
+            ))}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

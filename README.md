@@ -72,8 +72,11 @@ Sunucu calisirken Swagger UI uzerinden tum endpoint'ler test edilebilir: http://
 | `POST` | `/prompts/{id}/versions` | Yeni versiyon ekle (otomatik version_no artisi) | 201 | 404, 422 |
 | `GET` | `/prompts/{id}/versions` | Prompt'un tum versiyonlarini listele | 200 | 404 |
 | `GET` | `/prompts/{id}/versions/{v_no}` | Belirli bir versiyonu getir | 200 | 404 |
+| `POST` | `/prompts/{id}/diff` | Iki versiyon arasindaki farki hesapla | 200 | 404, 422 |
 
-**Versiyonlama Tasarimi:** Bir prompt'un icerigi olmadiginda anlamsiz olacagi icin, "her prompt en az 1 versiyona sahip olmalidir" kurali getirilmistir. `POST /prompts` istegi hem prompt basligini hem de ilk versiyon icerigini (content) alir; bu sayede atomic bir transaction icinde hem prompt kaydi hem de `version_no = 1` olan ilk versiyon ayni anda olusturulur. İleride diff işlemleri için `GET /prompts/{id}/versions/{version_no}` kullanılacaktır.
+**Versiyonlama Tasarimi:** Bir prompt'un icerigi olmadiginda anlamsiz olacagi icin, "her prompt en az 1 versiyona sahip olmalidir" kurali getirilmistir. `POST /prompts` istegi hem prompt basligini hem de ilk versiyon icerigini (content) alir; bu sayede atomic bir transaction icinde hem prompt kaydi hem de `version_no = 1` olan ilk versiyon ayni anda olusturulur.
+
+**Diff Motoru:** `POST /prompts/{id}/diff` endpoint'i Python standart kutuphanesindeki `difflib.ndiff` fonksiyonunu kullanarak **satir bazli** karsilastirma yapar. Istek body'si `{"version_a": <int>, "version_b": <int>}` formatindadir. Yanit, her satir icin `{"type": "unchanged|added|removed", "text": "..."}` yapisinda bir dizi dondurur. Ayni versiyonun kendisiyle karsilastirilmasi 422 ile reddedilir.
 
 **PUT vs PATCH karari:** `PATCH` tercih edildi cunku su an yalnizca `title` alani guncelleniyor (kismi guncelleme). `PUT` tum kaynak alanlarinin gonderilmesini gerektirir, bu da tek alanlik bir guncelleme icin gereksiz yuk olusturur. Ileride baska alanlar eklense bile `PATCH` semantigi daha uygun kalacaktir.
 
@@ -115,7 +118,8 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | ✅ Tamamlandı |
 | Gün 6 | Prompt Versiyonlama (Backend) | ✅ Tamamlandı |
 | Gün 7 | Versiyonlama UI (Frontend) | ✅ Tamamlandı |
-| Gün 8-10 | Diff motoru, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
+| Gün 8 | Diff motoru (Backend + Frontend bağlantısı) | ✅ Tamamlandı |
+| Gün 9-10 | Diff görselleştirme, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |
 | Gün 16-20 | Validation, Duplicate Detection, Token Tahmini, İstatistikler, Arama/Filtreleme, Son Demo — **Checkpoint #4** | 🔲 Planlandı |
 

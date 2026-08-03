@@ -32,3 +32,18 @@ export async function createVersion(promptId, content) {
   }
   return response.json();
 }
+
+export async function compareDiff(promptId, versionA, versionB) {
+  const response = await fetch(`${API_BASE_URL}/prompts/${promptId}/diff`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ version_a: versionA, version_b: versionB })
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to compute diff');
+  }
+  return response.json();
+}
