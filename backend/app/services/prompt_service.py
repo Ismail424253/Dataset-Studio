@@ -6,30 +6,35 @@ import sqlite3
 from typing import Optional
 
 
-def create_prompt(conn: sqlite3.Connection, title: str) -> dict:
+def create_prompt(conn: sqlite3.Connection, title: str, content: str) -> dict:
     """
-    Yeni bir prompt olusturur.
+    Yeni bir prompt ve ilk versiyonunu olusturur (atomic).
 
     Args:
         conn: SQLite baglantisi
         title: Prompt basligi
+        content: Ilk versiyon icerigi
 
     Returns:
-        Olusturulan prompt'un bilgileri (id, title, created_at, updated_at)
+        Olusturulan prompt'un bilgileri (id, title, created_at, updated_at, version_count)
     """
-    cursor = conn.execute(
-        "INSERT INTO prompts (title) VALUES (?)",
-        (title,)
-    )
-    conn.commit()
+    try:
+        cursor = conn.execute(
+            "INSERT INTO prompts (title) VALUES (?)",
+            (title,)
+        )
+        prompt_id = cursor.lastrowid
+        
+        conn.execute(
+            "INSERT INTO prompt_versions (prompt_id, version_no, content) VALUES (?, ?, ?)",
+            (prompt_id, 1, content)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
 
-    # Olusturulan prompt'u geri oku
-    row = conn.execute(
-        "SELECT id, title, created_at, updated_at FROM prompts WHERE id = ?",
-        (cursor.lastrowid,)
-    ).fetchone()
-
-    return dict(row)
+    return get_prompt_by_id(conn, prompt_id)
 
 
 def get_all_prompts(conn: sqlite3.Connection) -> list[dict]:
@@ -43,7 +48,11 @@ def get_all_prompts(conn: sqlite3.Connection) -> list[dict]:
         Prompt listesi
     """
     rows = conn.execute(
-        "SELECT id, title, created_at, updated_at FROM prompts ORDER BY created_at DESC"
+        """
+        SELECT p.id, p.title, p.created_at, p.updated_at, 
+               (SELECT COUNT(*) FROM prompt_versions v WHERE v.prompt_id = p.id) as version_count 
+        FROM prompts p ORDER BY p.created_at DESC
+        """
     ).fetchall()
 
     return [dict(row) for row in rows]
@@ -61,7 +70,11 @@ def get_prompt_by_id(conn: sqlite3.Connection, prompt_id: int) -> Optional[dict]
         Prompt bilgileri veya None (bulunamazsa)
     """
     row = conn.execute(
-        "SELECT id, title, created_at, updated_at FROM prompts WHERE id = ?",
+        """
+        SELECT p.id, p.title, p.created_at, p.updated_at,
+               (SELECT COUNT(*) FROM prompt_versions v WHERE v.prompt_id = p.id) as version_count
+        FROM prompts p WHERE p.id = ?
+        """,
         (prompt_id,)
     ).fetchone()
 

@@ -12,6 +12,7 @@ from datetime import datetime
 class PromptCreate(BaseModel):
     """POST /prompts istegi icin body semasi."""
     title: str = Field(..., min_length=1, max_length=255, description="Prompt basligi (zorunlu)")
+    content: str = Field(..., min_length=1, description="Ilk versiyon icerigi (zorunlu)")
 
 
 class PromptUpdate(BaseModel):
@@ -27,3 +28,4 @@ class PromptResponse(BaseModel):
     title: str
     created_at: str
     updated_at: str
+    version_count: Optional[int] = None
