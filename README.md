@@ -94,6 +94,14 @@ npm run dev
 
 **Birlikte Calistirma:** Backend ve Frontend'i birlikte calistirmak icin iki ayri terminal acip, birinde backend klasorunde `uvicorn app.main:app --reload` digerinde frontend klasorunde `npm run dev` komutlarini calistirmalisiniz.
 
+### Sayfa Yonlendirmesi (Routing)
+
+Uygulama iki gorunumden olusur: **Prompt Listesi** ve **Prompt Detay**. Sayfalar arasi gecis `react-router-dom` yerine `App.jsx` icerisinde yerel state (`selectedPromptId`) ile yonetilmektedir. Bu yaklasim, yalnizca iki gorunumlu kucuk bir uygulama icin ek bagimliligi gereksiz kilan basit ve yeterli bir cozumdur.
+
+### Versiyon Karsilastirma (Compare)
+
+Prompt detay sayfasindaki versiyon gecmisi listesinde, kullanici herhangi iki versiyonu secip (checkbox ile) "Karsilastir" butonuna basabilir. Su an diff motoru henuz eklenmemis oldugu icin (Gun 8'de yapilacak), buton secilen versiyonlari goruntuleyen bir placeholder mesaj gosterir.
+
 ## Proje Durumu ve Yol Haritası
 
 Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bir (Gün 5, 10, 15, 20) canlı demo içeren bir kontrol noktası (checkpoint) bulunmaktadır.
@@ -106,7 +114,8 @@ Bu proje 20 iş günlük bir plan dahilinde geliştirilmektedir. Her 5 günde bi
 | Gün 4 | Prompt CRUD API tamamlanması, hata yönetimi, test | ✅ Tamamlandı |
 | Gün 5 | Frontend iskelet yapısı (React+Vite+Tailwind), Prompt yönetimi UI — **Checkpoint #1** | ✅ Tamamlandı |
 | Gün 6 | Prompt Versiyonlama (Backend) | ✅ Tamamlandı |
-| Gün 7-10 | Versiyonlama UI, Diff, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
+| Gün 7 | Versiyonlama UI (Frontend) | ✅ Tamamlandı |
+| Gün 8-10 | Diff motoru, Etiketleme — **Checkpoint #2** | 🔲 Planlandı |
 | Gün 11-15 | Dataset oluşturma, JSONL/Alpaca/ShareGPT export — **Checkpoint #3** | 🔲 Planlandı |
 | Gün 16-20 | Validation, Duplicate Detection, Token Tahmini, İstatistikler, Arama/Filtreleme, Son Demo — **Checkpoint #4** | 🔲 Planlandı |
 

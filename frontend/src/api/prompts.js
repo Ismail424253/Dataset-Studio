@@ -8,13 +8,13 @@ export async function getPrompts() {
   return response.json();
 }
 
-export async function createPrompt(title) {
+export async function createPrompt(title, content) {
   const response = await fetch(`${API_BASE_URL}/prompts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ title })
+    body: JSON.stringify({ title, content })
   });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

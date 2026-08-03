@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getPrompts, createPrompt, updatePrompt, deletePrompt } from '../api/prompts';
 
-export default function PromptList() {
+export default function PromptList({ onOpenPrompt }) {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
   const [creating, setCreating] = useState(false);
   
   const [editingId, setEditingId] = useState(null);
@@ -39,11 +40,16 @@ export default function PromptList() {
       alert("Prompt başlığı çok uzun!");
       return;
     }
+    if (newContent.trim().length === 0) {
+      alert("Prompt içeriği boş olamaz!");
+      return;
+    }
     
     try {
       setCreating(true);
-      await createPrompt(newTitle);
+      await createPrompt(newTitle, newContent);
       setNewTitle('');
+      setNewContent('');
       await fetchPrompts();
     } catch (err) {
       alert("Oluşturma hatası: " + err.message);
@@ -87,8 +93,8 @@ export default function PromptList() {
     }
   };
 
-  if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
-  if (error) return <div className="text-red-500">Hata: {error}</div>;
+  if (loading) return <div className="text-center py-12 text-gray-500">Yükleniyor...</div>;
+  if (error) return <div className="text-center py-12 text-red-500">Hata: {error}</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -97,13 +103,20 @@ export default function PromptList() {
       {/* Create Form */}
       <div className="bg-white p-4 rounded-lg shadow mb-8">
         <h2 className="text-lg font-semibold mb-3">Yeni Prompt Oluştur</h2>
-        <form onSubmit={handleCreate} className="flex gap-2">
+        <form onSubmit={handleCreate} className="space-y-3">
           <input
             type="text"
-            className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Prompt başlığı..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
+            disabled={creating}
+          />
+          <textarea
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+            placeholder="Prompt içeriği (ilk versiyon)..."
+            value={newContent}
+            onChange={(e) => setNewContent(e.target.value)}
             disabled={creating}
           />
           <button
@@ -146,15 +159,28 @@ export default function PromptList() {
                   </form>
                 ) : (
                   <>
-                    <div className="flex-1">
-                      <div className="text-gray-800 font-medium">{prompt.title}</div>
+                    <div className="flex-1 cursor-pointer" onClick={() => onOpenPrompt(prompt.id)}>
+                      <div className="text-gray-800 font-medium hover:text-blue-600 transition-colors">
+                        {prompt.title}
+                      </div>
                       <div className="text-xs text-gray-400 mt-1">
                         Oluşturuldu: {new Date(prompt.created_at).toLocaleString('tr-TR')} 
                         {prompt.updated_at !== prompt.created_at && 
                           ` (Güncellendi: ${new Date(prompt.updated_at).toLocaleString('tr-TR')})`}
+                        {prompt.version_count != null && (
+                          <span className="ml-2 bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                            {prompt.version_count} versiyon
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-3 ml-4">
+                      <button 
+                        onClick={() => onOpenPrompt(prompt.id)}
+                        className="text-indigo-500 hover:text-indigo-700 text-sm font-medium"
+                      >
+                        Aç
+                      </button>
                       <button 
                         onClick={() => handleEdit(prompt)}
                         className="text-blue-500 hover:text-blue-700 text-sm font-medium"
